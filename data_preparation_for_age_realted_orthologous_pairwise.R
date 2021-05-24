@@ -1,0 +1,40 @@
+load('../9species.coding.rpkm1.meanstage.Rdata')
+load('../Mm_age_test_pval.Rdata');Mm_age_genes<-rownames(Exp_age_pval)[p.adjust(Exp_age_pval[,2],method='BH')<0.05]
+load('../Gg_age_test_pval.Rdata');Gg_age_genes<-rownames(Exp_age_pval)[p.adjust(Exp_age_pval[,2],method='BH')<0.05]
+load('../Ps_age_test_pval.Rdata');Ps_age_genes<-rownames(Exp_age_pval)[p.adjust(Exp_age_pval[,2],method='BH')<0.05]
+load('../Xl_age_test_pval.Rdata');Xl_age_genes<-rownames(Exp_age_pval)[p.adjust(Exp_age_pval[,2],method='BH')<0.05]
+load('../Xt_age_test_pval.Rdata');Xt_age_genes<-rownames(Exp_age_pval)[p.adjust(Exp_age_pval[,2],method='BH')<0.05]
+load('../Dr_age_test_pval.Rdata');Dr_age_genes<-rownames(Exp_age_pval)[p.adjust(Exp_age_pval[,2],method='BH')<0.05]
+load('../Bf_age_test_pval.Rdata');Bf_age_genes<-rownames(Exp_age_pval)[p.adjust(Exp_age_pval[,2],method='BH')<0.05]
+load('../Ci_age_test_pval.Rdata');Ci_age_genes<-rownames(Exp_age_pval)[p.adjust(Exp_age_pval[,2],method='BH')<0.05]
+load('../Cg_age_test_pval.Rdata');Cg_age_genes<-rownames(Exp_age_pval)[p.adjust(Exp_age_pval[,2],method='BH')<0.05]
+Mm_age_expression<-Mm_mat_cufflink_coding_rpkm1_mean[Mm_age_genes,];Mm_age_no<-nrow(Mm_age_expression);Mm_age_percent<-Mm_age_no/nrow(Mm_mat_cufflink_coding_rpkm1_mean)
+Gg_age_expression<-Gg_mat_cufflink_coding_rpkm1_mean[Gg_age_genes,];Gg_age_no<-nrow(Gg_age_expression);Gg_age_percent<-Gg_age_no/nrow(Gg_mat_cufflink_coding_rpkm1_mean) 
+Ps_age_expression<-Ps_mat_cufflink_coding_rpkm1_mean[Ps_age_genes,];Ps_age_no<-nrow(Ps_age_expression);Ps_age_percent<-Ps_age_no/nrow(Ps_mat_cufflink_coding_rpkm1_mean)
+Xl_age_expression<-Xl_mat_cufflink_coding_rpkm1_mean[Xl_age_genes,];Xl_age_no<-nrow(Xl_age_expression);Xl_age_percent<-Xl_age_no/nrow(Xl_mat_cufflink_coding_rpkm1_mean)
+Xt_age_expression<-Xt_mat_cufflink_coding_rpkm1_mean[Xt_age_genes,];Xt_age_no<-nrow(Xt_age_expression);Xt_age_percent<-Xt_age_no/nrow(Xt_mat_cufflink_coding_rpkm1_mean)
+Dr_age_expression<-Dr_mat_cufflink_coding_rpkm1_mean[Dr_age_genes,];Dr_age_no<-nrow(Dr_age_expression);Dr_age_percent<-Dr_age_no/nrow(Dr_mat_cufflink_coding_rpkm1_mean)
+Bf_age_expression<-Bf_mat_cufflink_coding_rpkm1_mean[Bf_age_genes,];Bf_age_no<-nrow(Bf_age_expression);Bf_age_percent<-Bf_age_no/nrow(Bf_mat_cufflink_coding_rpkm1_mean)
+Ci_age_expression<-Ci_mat_cufflink_coding_rpkm1_mean[Ci_age_genes,];Ci_age_no<-nrow(Ci_age_expression);Ci_age_percent<-Ci_age_no/nrow(Ci_mat_cufflink_coding_rpkm1_mean)
+Cg_age_expression<-Cg_mat_cufflink_coding_rpkm1_mean[Cg_age_genes,];Cg_age_no<-nrow(Cg_age_expression);Cg_age_percent<-Cg_age_no/nrow(Cg_mat_cufflink_coding_rpkm1_mean)
+save(Mm_age_no,Gg_age_no,Ps_age_no,Xl_age_no,Xt_age_no,Dr_age_no,Bf_age_no,Ci_age_no,Cg_age_no,Mm_age_percent,Gg_age_percent,Ps_age_percent,Xl_age_percent,Xt_age_percent
+	 ,Dr_age_percent,Bf_age_percent,Ci_age_percent,Cg_age_percent,file='no&percent_of_age_related_genes.Rdata')
+fs<-load('../orth_pairwise_gene_list.Rdata')
+fs<-fs[-grep('Dm',fs)]
+for(f in fs)
+  {
+  if( !( 'Mm' %in% strsplit(f,split='_')[[1]] ) )next
+  orth<-get(f)
+  sp1<-strsplit(f,split='_')[[1]][1]
+  sp2<-strsplit(f,split='_')[[1]][2]
+  sp1_age_expression<-get(paste(sp1,'_age_expression',sep=''))
+  sp2_age_expression<-get(paste(sp2,'_age_expression',sep=''))
+  sp1_plus<-data.frame(rownames(sp1_age_expression),sp1_age_expression);colnames(sp1_plus)[1]<-sp1
+  sp2_plus<-data.frame(rownames(sp2_age_expression),sp2_age_expression);colnames(sp2_plus)[1]<-sp2
+  t1<-merge(orth,sp1_plus,by=sp1,all=F)
+  t2<-merge(t1,sp2_plus,by=sp2,all=F)
+  rownames(t2)<-t2[,1]
+  t<-t2[,c(-1,-2)]
+  save(t,file=paste(f,'_age_orth_expression.Rdata',sep=''))
+  }
+
