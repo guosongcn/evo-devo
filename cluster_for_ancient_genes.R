@@ -1,0 +1,38 @@
+source('/picb/compbio.work/Xuchuan/script/stable.kmeans.R')
+library(som)
+cols<-c('red','blue','green')
+load('AL_expression.Rdata')
+lfiles<-c('Xl_ancient_expression','Xt_ancient_expression','Dr_ancient_expression','Bf_ancient_expression','Ci_ancient_expression','Cg_ancient_expression')
+pdf('./pdf/kmeans.pdf',width=16,height=4)
+par(mfrow=c(1,4),mgp=c(2,1,0),font.main=2,font.lab=2,font.axis=2,font=2)
+cls<-list()
+for(lfile in lfiles)
+	{
+	sp<-substr(lfile,1,2)
+	expression<-get(lfile)
+	expression<-as.data.frame(t(scale(t(expression))))
+	#foo<-som(expression,xdim=1,ydim=3);cl<-foo$visual$x+1+foo$visual$y*1
+	 cl<-stable.kmeans(times=1000,x=expression,centers=3)
+	cls<-c(cls,list(cl))
+	cl<-cl$cl
+	#cl<-cutree(hclust(as.dist(1-cor(t(expression)))),k=3)
+	splt<-split(expression,cl)
+	FUN<-function(x)
+		{
+		.x<-splt[[x]]
+		mns<-colMeans(.x);sds<-apply(.x,2,sd)
+		down<-mns-sds;up<-mns+sds
+		plot(1,type='n',ylim=c(min(down),max(up)),xlim=c(1,ncol(expression)),xlab='time',ylab='scaled expression',main=paste(sp,' cluster_',x,':',nrow(.x),sep=''))
+		polygon(c(1:ncol(expression),ncol(expression):1),c(down,rev(up)),border=NA,col=grey(0.8)) 
+		lines(1:ncol(expression),mns,lty=1,col=cols[x],lwd=2)
+		}	
+	splt<-splt[order(-sapply(splt,nrow))]
+	lapply(1:3,FUN)
+	ori<-as.numeric(names(rev(sort(table(cl)))))
+    cc<-numeric(length(cl))
+	cc[cl==ori[[1]]]<-1;cc[cl==ori[[2]]]<-2;cc[cl==ori[3]]<-3
+	plot(cmdscale(dist(expression)),col=cols[cc],xlab='dimension1',ylab='dimension2',main='MDS')
+	}
+dev.off()
+names(cls)<-c('Xl','Xt','Dr','Bf','Ci','Cg')
+save(cls,file='cls.Rdata')
